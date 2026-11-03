@@ -1,0 +1,27 @@
+Full URL,Full URL Status,Full URL Redirect,Already redirected URL
+https://www.oscarwylee.com.au/catalog/product/view/id/1051/s/leo-optical/category/,Error,Could not check (signal is aborted without reason),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1051/s/leo-optical/category/3,Error,Could not check (signal is aborted without reason),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1051/s/leo-optical/category/3/,Error,Could not check (signal is aborted without reason),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1051/s/leo-optical/category/3/faq-ordering.html,Error,Could not check (signal is aborted without reason),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1051/s/leo-optical/category/3/locations.html,Error,Could not check (signal is aborted without reason),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1051/s/leo-optical/category/5/faq-ordering.html,Error,Could not check (signal is aborted without reason),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1051/s/leo-optical/category/5/optical.html,Error,Could not check (signal is aborted without reason),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1052/s/faq-ordering.html,Error,Could not check (proxy HTTP 500),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1052/s/leo-sunglasses,Error,Could not check (signal is aborted without reason),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1052/s/leo-sunglasses/category/6,Error,Could not check (signal is aborted without reason),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1052/s/leo-sunglasses/category/6/,Error,Could not check (signal is aborted without reason),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1052/s/leo-sunglasses/category/7,Error,Could not check (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1052/s/leo-sunglasses/category/7/,Error,Could not check (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1052/s/leo-sunglasses/category/7/?options=cart,Error,Could not check (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1052/s/leo-sunglasses/category/8,Error,Could not check (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1052/s/leo-sunglasses/category/8/locations.html,Error,Could not check (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1052/s/leo-sunglasses/category/faq-ordering.html,Error,Could not check (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1052/s/leo-sunglasses/faq-ordering.html,Error,Could not check (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1131/s/aubrey-sunglasses/category/6,Error,Could not check (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1230/s/paris-sunglasses,Error,Could not check (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1230/s/paris-sunglasses/category/6,Error,Could not check (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1312/s/pacheco-sunglasses/category/7,Error,Could not check (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1312/s/pacheco-sunglasses/category/8,404,Could not verify correct URL (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1312/s/pacheco-sunglasses/locations.html,404,Could not verify correct URL (proxy HTTP 408),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1330/s/rhine-sunglasses/category/6,404,Could not verify correct URL (proxy HTTP 500),None
+https://www.oscarwylee.com.au/catalog/product/view/id/1376/s/montgomery-optical/category/5/,404,Could not verify correct URL (proxy HTTP 500),None

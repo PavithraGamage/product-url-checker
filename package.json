@@ -1,0 +1,17 @@
+{
+  "name": "product-url-checker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cors-proxy-server.js",
+  "scripts": {
+    "start": "node cors-proxy-server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

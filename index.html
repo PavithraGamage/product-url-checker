@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oscar Wylee — Broken Product URL Checker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+  :root{
+    --ink:#152233;
+    --ink-soft:#4b5b70;
+    --line:#dde3ea;
+    --paper:#f6f8fa;
+    --panel:#ffffff;
+    --navy:#1c3a5e;
+    --navy-dark:#122840;
+    --teal:#0f766e;
+    --teal-soft:#e6f4f2;
+    --amber:#b5720a;
+    --amber-soft:#fbf1de;
+    --coral:#b3301f;
+    --coral-soft:#fbe9e6;
+    --mono: "SF Mono", "Roboto Mono", Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.45;
+    padding-bottom:60px;
+  }
+  header.top{
+    background:linear-gradient(135deg,var(--navy-dark),var(--navy));
+    color:#eef3f8;
+    padding:34px 28px 28px;
+  }
+  header.top .eyebrow{
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#9fc3dd;
+    font-weight:600;
+    margin-bottom:8px;
+  }
+  header.top h1{
+    margin:0 0 6px;
+    font-size:26px;
+    font-weight:650;
+    letter-spacing:-.01em;
+  }
+  header.top p{
+    margin:0;
+    color:#c3d5e4;
+    font-size:14.5px;
+    max-width:680px;
+  }
+  main{
+    max-width:1180px;
+    margin:-18px auto 0;
+    padding:0 24px;
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:22px 24px;
+    margin-bottom:18px;
+    box-shadow:0 1px 2px rgba(20,30,45,.04);
+  }
+  .card h2{
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--ink-soft);
+    margin:0 0 14px;
+    font-weight:650;
+  }
+  .rule-box{
+    background:var(--teal-soft);
+    border:1px solid #bfe1db;
+    border-radius:8px;
+    padding:14px 16px;
+    font-size:13px;
+    color:#0b4a44;
+  }
+  .rule-box code{
+    background:#fff;
+    border:1px solid #bfe1db;
+    border-radius:4px;
+    padding:1px 6px;
+    font-family:var(--mono);
+    font-size:12px;
+  }
+  .upload-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:center;
+  }
+  .drop{
+    flex:1 1 320px;
+    border:2px dashed #c3cfdb;
+    border-radius:10px;
+    padding:22px;
+    text-align:center;
+    cursor:pointer;
+    transition:.15s border-color, .15s background;
+    background:#fbfcfd;
+  }
+  .drop:hover, .drop.drag{
+    border-color:var(--teal);
+    background:var(--teal-soft);
+  }
+  .drop input{display:none;}
+  .drop .fname{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--teal);
+    margin-top:6px;
+    word-break:break-all;
+  }
+  .drop .hint{
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    margin-top:16px;
+  }
+  button{
+    font-family:var(--sans);
+    font-size:13.5px;
+    font-weight:600;
+    border-radius:7px;
+    padding:10px 16px;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:.12s transform, .12s opacity;
+  }
+  button:active{transform:translateY(1px);}
+  button:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-primary{background:var(--teal);color:#fff;}
+  .btn-primary:hover:not(:disabled){background:#0c6259;}
+  .btn-ghost{background:#fff;color:var(--navy);border-color:var(--line);}
+  .btn-ghost:hover:not(:disabled){border-color:var(--navy);}
+  .btn-danger{background:#fff;color:var(--coral);border-color:#f0c9c2;}
+  .btn-danger:hover:not(:disabled){background:var(--coral-soft);}
+
+  details.adv{margin-top:14px;}
+  details.adv summary{
+    cursor:pointer;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    font-weight:600;
+    user-select:none;
+  }
+  .adv-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:14px;
+    margin-top:12px;
+  }
+  .adv-grid label{
+    display:block;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+    font-weight:600;
+  }
+  .adv-grid input{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-family:var(--mono);
+    font-size:12.5px;
+  }
+
+  .stat-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:12px;
+  }
+  .stat{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px 14px;
+    background:#fbfcfd;
+  }
+  .stat .n{font-size:22px;font-weight:700;color:var(--ink);}
+  .stat .l{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-top:2px;}
+  .stat.ok .n{color:var(--teal);}
+  .stat.warn .n{color:var(--amber);}
+  .stat.bad .n{color:var(--coral);}
+
+  .progress-wrap{
+    height:8px;
+    background:#e9edf1;
+    border-radius:4px;
+    overflow:hidden;
+    margin:14px 0 6px;
+  }
+  .progress-bar{
+    height:100%;
+    background:linear-gradient(90deg,var(--teal),#17968b);
+    width:0%;
+    transition:width .2s;
+  }
+  .progress-label{font-size:12px;color:var(--ink-soft);}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  thead th{
+    position:sticky;
+    top:0;
+    background:#f1f4f7;
+    text-align:left;
+    padding:9px 10px;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--ink-soft);
+    border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:9px 10px;
+    border-bottom:1px solid #eef1f4;
+    vertical-align:top;
+  }
+  tbody tr:hover{background:#fafcfd;}
+  .url-cell{
+    font-family:var(--mono);
+    font-size:12px;
+    max-width:360px;
+    overflow-wrap:anywhere;
+    color:var(--ink-soft);
+  }
+  .url-cell a{color:var(--navy);text-decoration:none;}
+  .url-cell a:hover{text-decoration:underline;}
+  .badge{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:11.5px;
+    font-weight:700;
+    padding:2px 7px;
+    border-radius:5px;
+    white-space:nowrap;
+  }
+  .badge.s200{background:var(--teal-soft);color:var(--teal);}
+  .badge.s301{background:var(--amber-soft);color:var(--amber);}
+  .badge.s400{background:var(--coral-soft);color:var(--coral);}
+  .badge.serr{background:#eee;color:#666;}
+  .redirect-cell{font-family:var(--mono);font-size:12px;max-width:340px;overflow-wrap:anywhere;}
+  .redirect-cell a{color:var(--teal);text-decoration:none;font-weight:600;}
+  .redirect-cell a:hover{text-decoration:underline;}
+  .redirect-cell.flag{color:var(--amber);font-weight:600;font-family:var(--sans);font-size:12.5px;}
+  .redirect-cell.err{color:var(--coral);font-family:var(--sans);font-size:12px;}
+  .table-wrap{
+    max-height:560px;
+    overflow:auto;
+    border:1px solid var(--line);
+    border-radius:8px;
+  }
+  .empty-state{
+    text-align:center;
+    padding:40px 20px;
+    color:var(--ink-soft);
+    font-size:13.5px;
+  }
+  footer.note{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 24px;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .row-num{color:#a6b2bf;font-family:var(--mono);font-size:11.5px;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">Oscar Wylee · SEO / URL Audit</div>
+  <h1>Broken Product URL Checker</h1>
+  <p>Upload the Full URL List CSV, check every catalog URL against its clean product URL, and export the redirect map — the same four columns every time: Full URL, Full URL Status, Full URL Redirect, Already redirected URL.</p>
+</header>
+
+<main>
+
+  <div class="card">
+    <h2>1 · Upload Full URL List.csv</h2>
+    <div class="upload-row">
+      <label class="drop" id="dropZone">
+        <input type="file" id="fileInput" accept=".csv" />
+        <div>📄 <strong>Click to choose</strong> or drop your CSV here</div>
+        <div class="hint">Expects a column named "Full URL" (falls back to the first column)</div>
+        <div class="fname" id="fname"></div>
+      </label>
+    </div>
+
+    <div class="controls">
+      <button class="btn-primary" id="startBtn" disabled>Start check</button>
+      <button class="btn-ghost" id="stopBtn" disabled>Stop</button>
+      <button class="btn-ghost" id="retryBtn" disabled>Retry errors only</button>
+      <button class="btn-ghost" id="downloadBtn" disabled>Download Output.csv</button>
+    </div>
+
+    <details class="adv">
+      <summary>Advanced settings</summary>
+      <div class="adv-grid">
+        <div>
+          <label>Concurrent requests</label>
+          <input type="number" id="concurrency" value="3" min="1" max="15">
+        </div>
+        <div>
+          <label>CORS proxy prefix</label>
+          <input type="text" id="proxyPrefix" value="http://localhost:9876/get?url=">
+        </div>
+        <div>
+          <label>Request timeout (ms)</label>
+          <input type="number" id="timeoutMs" value="20000" min="3000" step="1000">
+        </div>
+        <div>
+          <label>Delay between requests (ms)</label>
+          <input type="number" id="requestDelay" value="400" min="0" step="100">
+        </div>
+        <div>
+          <label>Max retries per URL</label>
+          <input type="number" id="maxRetries" value="3" min="0" max="10">
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>How a redirect target is chosen</h2>
+    <div class="rule-box">
+      Original URL <code>.../catalog/product/view/id/1052/s/leo-sunglasses/category/8/locations.html</code> is checked first.
+      If it's already redirecting, that target is reported as-is. Otherwise the product slug (<code>leo-sunglasses</code>) is extracted and
+      rebuilt as <code>/leo-sunglasses.html</code>, which is checked in turn: 200 → use it as-is · redirects → use its final target ·
+      404 → fall back to <code>/sunglasses.html</code> if the slug contains "sunglass", otherwise <code>/glasses.html</code>.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2 · Progress</h2>
+    <div class="stat-row">
+      <div class="stat"><div class="n" id="statTotal">0</div><div class="l">Total URLs</div></div>
+      <div class="stat"><div class="n" id="statChecked">0</div><div class="l">Checked</div></div>
+      <div class="stat ok"><div class="n" id="statRedirected">0</div><div class="l">Already redirected</div></div>
+      <div class="stat warn"><div class="n" id="statNeeds">0</div><div class="l">Needs new redirect</div></div>
+      <div class="stat bad"><div class="n" id="statErrors">0</div><div class="l">Errors</div></div>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-label" id="progressLabel">Waiting for a file…</div>
+  </div>
+
+  <div class="card">
+    <h2>3 · Results</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Full URL</th>
+            <th>Full URL Status</th>
+            <th>Full URL Redirect</th>
+            <th>Already redirected URL</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody">
+          <tr><td colspan="5"><div class="empty-state">No results yet — upload a CSV and click "Start check".</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<footer class="note">
+  Status checks run through a public CORS proxy (AllOrigins by default) since oscarwylee.com.au doesn't send browser CORS headers directly.
+  "Already redirected" is detected by comparing the requested URL to the proxy's final resolved URL (path only, ignoring query string and trailing slash) — the exact 301 vs 302 code isn't recoverable this way, so it's always labelled 301. Free proxies rate-limit under load; use "Retry errors only" if some rows fail.
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  let rows = [];          // {fullUrl}
+  let results = [];        // parallel array of result objects
+  let stopped = false;
+  let running = false;
+
+  const fileInput = document.getElementById('fileInput');
+  const dropZone = document.getElementById('dropZone');
+  const fname = document.getElementById('fname');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const retryBtn = document.getElementById('retryBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const resultsBody = document.getElementById('resultsBody');
+  const progressBar = document.getElementById('progressBar');
+  const progressLabel = document.getElementById('progressLabel');
+
+  const statTotal = document.getElementById('statTotal');
+  const statChecked = document.getElementById('statChecked');
+  const statRedirected = document.getElementById('statRedirected');
+  const statNeeds = document.getElementById('statNeeds');
+  const statErrors = document.getElementById('statErrors');
+
+  // ---------- CSV intake ----------
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
+  });
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag');
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+
+  function handleFile(file){
+    fname.textContent = file.name;
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: function(parsed){
+        const fields = parsed.meta.fields || [];
+        let col = fields.find(f => f.trim().toLowerCase() === 'full url');
+        if (!col) col = fields[0];
+        rows = parsed.data
+          .map(r => (r[col] || '').trim())
+          .filter(v => v.length > 0)
+          .map(fullUrl => ({ fullUrl }));
+        results = rows.map(() => null);
+        renderTable();
+        updateStats();
+        startBtn.disabled = rows.length === 0;
+        progressLabel.textContent = rows.length + ' URLs loaded. Ready to check.';
+      },
+      error: function(err){
+        progressLabel.textContent = 'Could not read that CSV: ' + err.message;
+      }
+    });
+  }
+
+  // ---------- URL logic ----------
+
+  function parseProductUrl(fullUrl){
+    let u;
+    try { u = new URL(fullUrl); } catch(e) { return null; }
+    const m = u.pathname.match(/\/catalog\/product\/view\/id\/\d+\/s\/([^\/]+)/i);
+    if (!m) return null;
+    let slug = m[1].replace(/\.html?$/i, '');
+    try { slug = decodeURIComponent(slug); } catch(e){}
+    const correctUrl = u.origin + '/' + slug + '.html';
+    const isSunglasses = slug.toLowerCase().includes('sunglass');
+    const fallbackUrl = u.origin + '/' + (isSunglasses ? 'sunglasses' : 'glasses') + '.html';
+    return { slug, correctUrl, fallbackUrl };
+  }
+
+  function normalizeForCompare(u){
+    try {
+      const x = new URL(u);
+      const path = x.pathname.replace(/\/+$/, '');
+      return (x.origin + path).toLowerCase();
+    } catch(e){
+      return (u || '').toLowerCase();
+    }
+  }
+
+  async function checkUrl(url){
+    const proxyPrefix = document.getElementById('proxyPrefix').value.trim();
+    const timeoutMs = parseInt(document.getElementById('timeoutMs').value, 10) || 20000;
+    const maxRetries = parseInt(document.getElementById('maxRetries').value, 10) || 3;
+    let lastError = 'unknown error';
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      if (stopped) return { ok:false, error:'stopped' };
+      if (attempt > 0) {
+        const backoff = Math.min(2000 * Math.pow(2, attempt - 1), 16000);
+        await new Promise(r => setTimeout(r, backoff + Math.random() * 1000));
+      }
+
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(proxyPrefix + encodeURIComponent(url), { signal: controller.signal });
+        clearTimeout(timer);
+        if (!res.ok) { lastError = 'proxy HTTP ' + res.status; continue; }
+        const data = await res.json();
+        const httpCode = data && data.status && data.status.http_code;
+        const finalUrl = (data && data.status && data.status.url) || url;
+        if (typeof httpCode !== 'number') { lastError = 'unexpected proxy response'; continue; }
+        const redirected = normalizeForCompare(finalUrl) !== normalizeForCompare(url);
+        return { ok:true, status: httpCode, redirected, finalUrl };
+      } catch(err){
+        clearTimeout(timer);
+        lastError = (err && err.message) ? err.message : String(err);
+      }
+    }
+    return { ok:false, error: lastError };
+  }
+
+  async function processRow(fullUrl){
+    const original = await checkUrl(fullUrl);
+
+    if (!original.ok){
+      return { fullUrl, status:'Error', redirect:'Could not check (' + original.error + ')', already:'None', isError:true };
+    }
+
+    if (original.redirected){
+      return { fullUrl, status:'301', redirect:'Already redirected', already: original.finalUrl, isError:false };
+    }
+
+    const statusStr = String(original.status);
+    const parsed = parseProductUrl(fullUrl);
+    if (!parsed){
+      return { fullUrl, status: statusStr, redirect:'Could not determine product slug', already:'None', isError:false };
+    }
+
+    const correct = await checkUrl(parsed.correctUrl);
+    if (!correct.ok){
+      return { fullUrl, status: statusStr, redirect:'Could not verify correct URL (' + correct.error + ')', already:'None', isError:true };
+    }
+
+    let redirect;
+    if (correct.redirected){
+      redirect = correct.finalUrl;
+    } else if (correct.status === 200){
+      redirect = parsed.correctUrl;
+    } else {
+      redirect = parsed.fallbackUrl;
+    }
+
+    return { fullUrl, status: statusStr, redirect, already:'None', isError:false };
+  }
+
+  // ---------- concurrency pool ----------
+
+  async function runPool(indices){
+    const concurrency = Math.max(1, parseInt(document.getElementById('concurrency').value, 10) || 3);
+    let cursor = 0;
+    let activeCount = 0;
+    let doneCount = 0;
+    const total = indices.length;
+
+    return new Promise((resolve) => {
+      function launchNext(){
+        if (stopped){ if (activeCount === 0) resolve(); return; }
+        if (cursor >= indices.length && activeCount === 0){ resolve(); return; }
+        while (!stopped && activeCount < concurrency && cursor < indices.length){
+          const rowIndex = indices[cursor++];
+          activeCount++;
+          processRow(rows[rowIndex].fullUrl).then((res) => {
+            results[rowIndex] = res;
+            activeCount--;
+            doneCount++;
+            updateRowInTable(rowIndex);
+            updateStats();
+            progressBar.style.width = Math.round((doneCount/total)*100) + '%';
+            progressLabel.textContent = 'Checked ' + doneCount + ' / ' + total + '…';
+            const delay = Math.max(0, parseInt(document.getElementById('requestDelay').value, 10) || 400);
+            if (delay > 0) {
+              setTimeout(launchNext, delay);
+            } else {
+              launchNext();
+            }
+          });
+        }
+        if (stopped && activeCount === 0) resolve();
+      }
+      launchNext();
+    });
+  }
+
+  // ---------- table rendering ----------
+
+  function badgeClass(status){
+    if (status === 'Error') return 'serr';
+    const n = parseInt(status, 10);
+    if (n === 200) return 's200';
+    if (n === 301 || n === 302) return 's301';
+    return 's400';
+  }
+
+  function renderTable(){
+    if (rows.length === 0){
+      resultsBody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No results yet — upload a CSV and click "Start check".</div></td></tr>';
+      return;
+    }
+    let html = '';
+    for (let i = 0; i < rows.length; i++){
+      html += rowHtml(i);
+    }
+    resultsBody.innerHTML = html;
+  }
+
+  function rowHtml(i){
+    const fullUrl = rows[i].fullUrl;
+    const r = results[i];
+    if (!r){
+      return '<tr id="row-' + i + '"><td class="row-num">' + (i+1) + '</td>' +
+        '<td class="url-cell">' + escapeHtml(fullUrl) + '</td>' +
+        '<td>—</td><td class="redirect-cell">Pending…</td><td>—</td></tr>';
+    }
+    const statusHtml = '<span class="badge ' + badgeClass(r.status) + '">' + escapeHtml(r.status) + '</span>';
+    let redirectHtml;
+    if (r.redirect === 'Already redirected'){
+      redirectHtml = '<span class="redirect-cell flag">Already redirected</span>';
+    } else if (r.isError){
+      redirectHtml = '<span class="redirect-cell err">' + escapeHtml(r.redirect) + '</span>';
+    } else if (/^https?:\/\//i.test(r.redirect)){
+      redirectHtml = '<span class="redirect-cell"><a href="' + escapeAttr(r.redirect) + '" target="_blank" rel="noopener">' + escapeHtml(r.redirect) + '</a></span>';
+    } else {
+      redirectHtml = '<span class="redirect-cell">' + escapeHtml(r.redirect) + '</span>';
+    }
+    const alreadyHtml = (r.already && r.already !== 'None')
+      ? '<span class="redirect-cell"><a href="' + escapeAttr(r.already) + '" target="_blank" rel="noopener">' + escapeHtml(r.already) + '</a></span>'
+      : 'None';
+
+    return '<tr id="row-' + i + '"><td class="row-num">' + (i+1) + '</td>' +
+      '<td class="url-cell"><a href="' + escapeAttr(fullUrl) + '" target="_blank" rel="noopener">' + escapeHtml(fullUrl) + '</a></td>' +
+      '<td>' + statusHtml + '</td>' +
+      '<td>' + redirectHtml + '</td>' +
+      '<td>' + alreadyHtml + '</td></tr>';
+  }
+
+  function updateRowInTable(i){
+    const el = document.getElementById('row-' + i);
+    if (!el) return;
+    el.outerHTML = rowHtml(i);
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function escapeAttr(s){ return escapeHtml(s); }
+
+  // ---------- stats ----------
+
+  function updateStats(){
+    const total = rows.length;
+    const checked = results.filter(r => r !== null).length;
+    const redirected = results.filter(r => r && r.redirect === 'Already redirected').length;
+    const errors = results.filter(r => r && r.isError).length;
+    const needs = results.filter(r => r && !r.isError && r.redirect !== 'Already redirected').length;
+
+    statTotal.textContent = total;
+    statChecked.textContent = checked;
+    statRedirected.textContent = redirected;
+    statNeeds.textContent = needs;
+    statErrors.textContent = errors;
+
+    downloadBtn.disabled = checked === 0;
+    retryBtn.disabled = errors === 0 || running;
+  }
+
+  // ---------- controls ----------
+
+  startBtn.addEventListener('click', async () => {
+    if (rows.length === 0 || running) return;
+    running = true; stopped = false;
+    startBtn.disabled = true; stopBtn.disabled = false; retryBtn.disabled = true; downloadBtn.disabled = true;
+    results = rows.map(() => null);
+    renderTable();
+    updateStats();
+    const indices = rows.map((_, i) => i);
+    await runPool(indices);
+    running = false;
+    startBtn.disabled = false; stopBtn.disabled = true;
+    updateStats();
+    progressLabel.textContent = stopped ? 'Stopped.' : 'Done — checked ' + rows.length + ' URLs.';
+  });
+
+  stopBtn.addEventListener('click', () => {
+    stopped = true;
+    stopBtn.disabled = true;
+  });
+
+  retryBtn.addEventListener('click', async () => {
+    const indices = results.map((r, i) => (r && r.isError) ? i : -1).filter(i => i >= 0);
+    if (indices.length === 0 || running) return;
+    running = true; stopped = false;
+    startBtn.disabled = true; stopBtn.disabled = false; retryBtn.disabled = true;
+    indices.forEach(i => { results[i] = null; updateRowInTable(i); });
+    await runPool(indices);
+    running = false;
+    startBtn.disabled = false; stopBtn.disabled = true;
+    updateStats();
+    progressLabel.textContent = 'Retry finished.';
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    const data = rows.map((row, i) => {
+      const r = results[i];
+      return {
+        'Full URL': row.fullUrl,
+        'Full URL Status': r ? r.status : '',
+        'Full URL Redirect': r ? r.redirect : '',
+        'Already redirected URL': r ? r.already : ''
+      };
+    }).filter((_, i) => results[i] !== null);
+    const csv = Papa.unparse(data);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Output.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+})();
+</script>
+
+</body>
+</html>
